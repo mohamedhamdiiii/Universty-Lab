@@ -1,0 +1,49 @@
+<div class="home-container">
+  <!-- Logged-in view -->
+  <div *ngIf="isLoggedIn && currentUser" class="welcome-section">
+    <h1>Welcome, {{ currentUser.firstName }}! 👋</h1>
+    <span class="role-badge" [class.admin]="currentUser.role === 'admin'">
+      {{ currentUser.role | titlecase }}
+    </span>
+    <p class="welcome-text">Manage your laboratory bookings and equipment reservations from here.</p>
+
+    <div class="quick-links">
+      <a routerLink="/profile" class="card-link">
+        <div class="card-icon">👤</div>
+        <h3>My Profile</h3>
+        <p>View and update your personal information</p>
+      </a>
+
+      <a routerLink="/" class="card-link">
+        <div class="card-icon">🔬</div>
+        <h3>Book a Lab</h3>
+        <p>Reserve a laboratory for your experiments</p>
+      </a>
+
+      <a routerLink="/" class="card-link">
+        <div class="card-icon">🛠️</div>
+        <h3>Equipment</h3>
+        <p>Browse and reserve available equipment</p>
+      </a>
+
+      <a *ngIf="currentUser.role === 'admin'" routerLink="/" class="card-link admin-card">
+        <div class="card-icon">⚙️</div>
+        <h3>Admin Panel</h3>
+        <p>Manage users, labs, and equipment</p>
+      </a>
+    </div>
+  </div>
+
+  <!-- Guest view -->
+  <div *ngIf="!isLoggedIn" class="guest-section">
+    <h1>🔬 Lab Booking System</h1>
+    <p class="hero-text">
+      The easiest way to book university laboratories and equipment.
+      Sign in to get started.
+    </p>
+    <div class="cta-buttons">
+      <a routerLink="/login" class="btn-primary">Sign In</a>
+      <a routerLink="/register" class="btn-accent">Create Account</a>
+    </div>
+  </div>
+</div>

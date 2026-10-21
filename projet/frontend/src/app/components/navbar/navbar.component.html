@@ -1,0 +1,25 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <a class="nav-brand" routerLink="/">🔬 Lab Booking System</a>
+
+    <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen">
+      <span></span><span></span><span></span>
+    </button>
+
+    <div class="nav-links" [class.open]="menuOpen">
+      <!-- Logged-in links -->
+      <ng-container *ngIf="isLoggedIn">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="menuOpen=false">Home</a>
+        <a routerLink="/profile" routerLinkActive="active" (click)="menuOpen=false">Profile</a>
+        <a *ngIf="isAdmin" routerLink="/admin/users" routerLinkActive="active" (click)="menuOpen=false">Manage Users</a>
+        <button class="btn-logout" (click)="logout()">Logout</button>
+      </ng-container>
+
+      <!-- Guest links -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" routerLinkActive="active" (click)="menuOpen=false">Login</a>
+        <a routerLink="/register" routerLinkActive="active" class="btn-register" (click)="menuOpen=false">Register</a>
+      </ng-container>
+    </div>
+  </div>
+</nav>

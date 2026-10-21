@@ -1,0 +1,88 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <h2>My Profile</h2>
+
+    <!-- Success / Error messages -->
+    <div class="success-banner" *ngIf="successMessage">✓ {{ successMessage }}</div>
+    <div class="error-banner" *ngIf="errorMessage">⚠ {{ errorMessage }}</div>
+
+    <div *ngIf="user">
+      <!-- View mode -->
+      <div class="info-section" *ngIf="!editMode">
+        <div class="info-row">
+          <span class="info-label">Name</span>
+          <span class="info-value">{{ user.firstName }} {{ user.lastName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ user.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Role</span>
+          <span class="role-badge" [class.admin]="user.role === 'admin'">{{ user.role | titlecase }}</span>
+        </div>
+        <div class="info-row" *ngIf="user.phone">
+          <span class="info-label">Phone</span>
+          <span class="info-value">{{ user.phone }}</span>
+        </div>
+        <div class="info-row" *ngIf="user.department">
+          <span class="info-label">Department</span>
+          <span class="info-value">{{ user.department }}</span>
+        </div>
+        <button class="btn-primary" (click)="toggleEdit()">Edit Profile</button>
+      </div>
+
+      <!-- Edit mode -->
+      <form *ngIf="editMode" [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="edit-form">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" formControlName="firstName" />
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" formControlName="lastName" />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="text" formControlName="phone" placeholder="Phone number" />
+        </div>
+        <div class="form-group">
+          <label>Department</label>
+          <input type="text" formControlName="department" placeholder="Department" />
+        </div>
+        <div class="btn-row">
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            {{ loading ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="toggleEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Change Password -->
+  <div class="profile-card">
+    <h3>Change Password</h3>
+
+    <div class="success-banner" *ngIf="passwordSuccess">✓ {{ passwordSuccess }}</div>
+    <div class="error-banner" *ngIf="passwordError">⚠ {{ passwordError }}</div>
+
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" formControlName="currentPassword" placeholder="Current password" />
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" formControlName="newPassword" placeholder="Min 6 characters" />
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" formControlName="confirmNewPassword" placeholder="Re-enter new password" />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="passwordLoading">
+        {{ passwordLoading ? 'Changing...' : 'Change Password' }}
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,96 @@
+<div class="register-container">
+  <div class="register-card">
+    <h2>Create Account</h2>
+    <p class="subtitle">Join the Lab Booking System today.</p>
+
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="error-icon">⚠</span> {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- Name row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input id="firstName" type="text" formControlName="firstName"
+                 placeholder="First name"
+                 [class.input-error]="f['firstName'].touched && f['firstName'].invalid" />
+          <div class="field-error" *ngIf="f['firstName'].touched && f['firstName'].errors?.['required']">
+            First name is required.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input id="lastName" type="text" formControlName="lastName"
+                 placeholder="Last name"
+                 [class.input-error]="f['lastName'].touched && f['lastName'].invalid" />
+          <div class="field-error" *ngIf="f['lastName'].touched && f['lastName'].errors?.['required']">
+            Last name is required.
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" formControlName="email"
+               placeholder="Enter your email"
+               [class.input-error]="f['email'].touched && f['email'].invalid" />
+        <div class="field-error" *ngIf="f['email'].touched && f['email'].errors">
+          <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
+          <span *ngIf="f['email'].errors?.['email']">Please enter a valid email.</span>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" formControlName="password"
+               placeholder="Minimum 6 characters"
+               [class.input-error]="f['password'].touched && f['password'].invalid" />
+        <div class="field-error" *ngIf="f['password'].touched && f['password'].errors">
+          <span *ngIf="f['password'].errors?.['required']">Password is required.</span>
+          <span *ngIf="f['password'].errors?.['minlength']">Password must be at least 6 characters.</span>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input id="confirmPassword" type="password" formControlName="confirmPassword"
+               placeholder="Re-enter your password"
+               [class.input-error]="f['confirmPassword'].touched && (f['confirmPassword'].invalid || registerForm.errors?.['passwordMismatch'])" />
+        <div class="field-error" *ngIf="f['confirmPassword'].touched">
+          <span *ngIf="f['confirmPassword'].errors?.['required']">Please confirm your password.</span>
+          <span *ngIf="!f['confirmPassword'].errors?.['required'] && registerForm.errors?.['passwordMismatch']">
+            Passwords do not match.
+          </span>
+        </div>
+      </div>
+
+      <!-- Optional fields -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="phone">Phone <span class="optional">(optional)</span></label>
+          <input id="phone" type="text" formControlName="phone" placeholder="Phone number" />
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department <span class="optional">(optional)</span></label>
+          <input id="department" type="text" formControlName="department" placeholder="Department" />
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">Create Account</span>
+        <span *ngIf="loading">Creating account...</span>
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

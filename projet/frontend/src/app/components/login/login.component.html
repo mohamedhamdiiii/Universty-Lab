@@ -1,0 +1,54 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2>Sign In</h2>
+    <p class="subtitle">Welcome back! Please login to your account.</p>
+
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="error-icon">⚠</span> {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.input-error]="f['email'].touched && f['email'].invalid"
+        />
+        <div class="field-error" *ngIf="f['email'].touched && f['email'].errors">
+          <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
+          <span *ngIf="f['email'].errors?.['email']">Please enter a valid email.</span>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          [class.input-error]="f['password'].touched && f['password'].invalid"
+        />
+        <div class="field-error" *ngIf="f['password'].touched && f['password'].errors">
+          <span *ngIf="f['password'].errors?.['required']">Password is required.</span>
+          <span *ngIf="f['password'].errors?.['minlength']">Password must be at least 6 characters.</span>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        <span *ngIf="!loading">Sign In</span>
+        <span *ngIf="loading">Signing in...</span>
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Don't have an account? <a routerLink="/register">Create one</a>
+    </p>
+  </div>
+</div>

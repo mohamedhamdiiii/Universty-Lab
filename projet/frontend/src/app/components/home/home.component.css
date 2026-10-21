@@ -1,0 +1,149 @@
+.home-container {
+  min-height: calc(100vh - 64px);
+  background: #f5f5f5;
+  padding: 40px 20px;
+}
+
+/* Logged-in welcome */
+.welcome-section {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.welcome-section h1 {
+  font-size: 32px;
+  color: #222;
+  margin: 0 0 8px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #e3f2fd;
+  color: #1565c0;
+  margin-bottom: 8px;
+}
+
+.role-badge.admin {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.welcome-text {
+  color: #757575;
+  font-size: 16px;
+  margin-bottom: 36px;
+}
+
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.card-link {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 28px 20px;
+  text-decoration: none;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.card-link h3 {
+  margin: 0 0 6px;
+  color: #1976d2;
+  font-size: 17px;
+}
+
+.card-link p {
+  margin: 0;
+  color: #757575;
+  font-size: 13px;
+}
+
+.admin-card {
+  border: 2px solid #ff9800;
+}
+
+/* Guest hero */
+.guest-section {
+  max-width: 600px;
+  margin: 80px auto 0;
+  text-align: center;
+}
+
+.guest-section h1 {
+  font-size: 40px;
+  color: #1976d2;
+  margin: 0 0 16px;
+}
+
+.hero-text {
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 14px 36px;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1565c0;
+}
+
+.btn-accent {
+  padding: 14px 36px;
+  background: #ff9800;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-accent:hover {
+  background: #f57c00;
+}
+
+@media (max-width: 480px) {
+  .welcome-section h1 {
+    font-size: 24px;
+  }
+
+  .guest-section h1 {
+    font-size: 28px;
+  }
+}
