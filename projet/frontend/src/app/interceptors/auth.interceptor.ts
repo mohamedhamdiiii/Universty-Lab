@@ -1,24 +1,58 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { catchError, tap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(private authService: AuthService) {}
+/**
+ * Auth Interceptor — functional interceptor for Angular standalone apps.
+ *
+ * - Attaches the JWT Bearer token to all outgoing API requests (except login/register).
+ * - Reads the X-Refreshed-Token header from responses and updates the stored token.
+ * - Handles 401 Unauthorized responses by clearing auth state and redirecting to login.
+ */
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.authService.getToken();
+  // Don't attach token to login or register requests
+  const isAuthRequest = req.url.includes('/user/login') || req.url.includes('/user/register');
 
+  let authReq = req;
+
+  if (!isAuthRequest) {
+    const token = authService.getToken();
     if (token) {
-      const cloned = req.clone({
+      authReq = req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
-        }
+        },
+        withCredentials: true
       });
-      return next.handle(cloned);
     }
-
-    return next.handle(req);
   }
-}
+
+  return next(authReq).pipe(
+    // Check for refreshed token in response headers
+    tap(event => {
+      if (event.type !== 0) { // Not a Sent event
+        const httpResponse = event as any;
+        if (httpResponse.headers) {
+          const refreshedToken = httpResponse.headers.get('X-Refreshed-Token');
+          if (refreshedToken) {
+            authService.updateToken(refreshedToken);
+          }
+        }
+      }
+    }),
+
+    // Handle 401 errors
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && !isAuthRequest) {
+        // Token is invalid or expired — logout and redirect
+        authService.logout();
+      }
+      return throwError(() => error);
+    })
+  );
+};

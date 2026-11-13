@@ -1,54 +1,61 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Sign In</h2>
-    <p class="subtitle">Welcome back! Please login to your account.</p>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your account</p>
+    </div>
 
-    <div class="error-banner" *ngIf="errorMessage">
-      <span class="error-icon">⚠</span> {{ errorMessage }}
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <span>{{ errorMessage }}</span>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <!-- Email -->
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="username">Username <span class="required">*</span></label>
         <input
-          id="email"
-          type="email"
-          formControlName="email"
-          placeholder="Enter your email"
-          [class.input-error]="f['email'].touched && f['email'].invalid"
+          type="text"
+          id="username"
+          formControlName="username"
+          placeholder="Enter your username"
+          [class.input-error]="f['username'].touched && f['username'].invalid"
+          autocomplete="username"
         />
-        <div class="field-error" *ngIf="f['email'].touched && f['email'].errors">
-          <span *ngIf="f['email'].errors?.['required']">Email is required.</span>
-          <span *ngIf="f['email'].errors?.['email']">Please enter a valid email.</span>
+        <div class="validation-error" *ngIf="f['username'].touched && f['username'].errors">
+          <span *ngIf="f['username'].errors?.['required']">Username is required.</span>
         </div>
       </div>
 
-      <!-- Password -->
       <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="Enter your password"
-          [class.input-error]="f['password'].touched && f['password'].invalid"
-        />
-        <div class="field-error" *ngIf="f['password'].touched && f['password'].errors">
+        <label for="password">Password <span class="required">*</span></label>
+        <div class="password-input-wrapper">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            id="password"
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.input-error]="f['password'].touched && f['password'].invalid"
+            autocomplete="current-password"
+          />
+          <button type="button" class="toggle-password" (click)="togglePassword()" tabindex="-1">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
+        <div class="validation-error" *ngIf="f['password'].touched && f['password'].errors">
           <span *ngIf="f['password'].errors?.['required']">Password is required.</span>
-          <span *ngIf="f['password'].errors?.['minlength']">Password must be at least 6 characters.</span>
         </div>
       </div>
 
-      <!-- Submit -->
-      <button type="submit" class="btn-primary" [disabled]="loading">
-        <span *ngIf="!loading">Sign In</span>
-        <span *ngIf="loading">Signing in...</span>
+      <button type="submit" class="btn-primary" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading" class="spinner"></span>
       </button>
     </form>
 
-    <p class="footer-text">
-      Don't have an account? <a routerLink="/register">Create one</a>
-    </p>
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register">Create one</a></p>
+    </div>
   </div>
 </div>

@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+<<<<<<< HEAD
 import { ReservationService } from '../../services/reservation.service';
 import { Reservation } from '../../models/reservation.model';
+import { User } from '../../models/user.model';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,11 +18,18 @@ export class DashboardComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   activeFilter: 'all' | 'active' | 'pending' | 'approved' | 'past' = 'all';
+    currentUser: User | null = null;
+  users: User[] = [];
+  isLoadingUsers = false;
+  usersError = '';
 
-  constructor(private reservationService: ReservationService) {}
+  constructor(private reservationService: ReservationService,  private authService: AuthService,
+    private router: Router) {}
 
   ngOnInit(): void {
     this.loadReservations();
+      this.currentUser = this.authService.getCurrentUser();
+    this.loadUsers();
   }
 
   loadReservations(): void {
@@ -32,9 +43,30 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load reservations';
         this.loading = false;
+
       }
     });
   }
+
+
+
+
+
+ 
+
+  loadUsers(): void {
+    this.isLoadingUsers = true;
+    this.usersError = '';
+
+    this.authService.getAllUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.isLoadingUsers = false;
+      },
+      error: (err) => {
+        this.usersError = err.error?.message || 'Failed to load users.';
+        this.isLoadingUsers = false;
+      }}) }
 
   applyFilter(filter: 'all' | 'active' | 'pending' | 'approved' | 'past'): void {
     this.activeFilter = filter;
@@ -84,6 +116,22 @@ export class DashboardComponent implements OnInit {
       case 'returned': return 'badge-returned';
       case 'cancelled': return 'badge-cancelled';
       default: return '';
+    }}
+  logout(): void {
+    this.authService.logout();
+  }
+
+  deleteUser(id: string): void {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.authService.deleteUser(id).subscribe({
+        next: () => {
+          this.users = this.users.filter(u => u.id !== id);
+        },
+        error: (err) => {
+          alert(err.error?.message || 'Failed to delete user.');
+        }
+      });
+
     }
   }
 }

@@ -1,69 +1,84 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css']
+  styleUrl: './register.component.css'
 })
-export class RegisterComponent implements OnInit {
-  registerForm!: FormGroup;
-  loading = false;
+export class RegisterComponent {
+  registerForm: FormGroup;
+  showPassword = false;
+  isLoading = false;
+  successMessage = '';
   errorMessage = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/']);
-    }
-
+  ) {
     this.registerForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
+      firstname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      lastname: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      username: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
+      email: ['', [Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required],
-      phone: [''],
-      department: ['']
-    }, { validators: this.passwordMatchValidator });
+      confirmPassword: ['', [Validators.required]]
+    });
   }
 
-  get f() {
-    return this.registerForm.controls;
+  // Convenience getters for template validation
+  get f() { return this.registerForm.controls; }
+
+  get passwordMismatch(): boolean {
+    return this.registerForm.get('password')?.value !== this.registerForm.get('confirmPassword')?.value;
   }
 
-  /** Custom validator — confirmPassword must match password */
-  private passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('password')?.value;
-    const confirm = group.get('confirmPassword')?.value;
-    return password === confirm ? null : { passwordMismatch: true };
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 
   onSubmit(): void {
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    // Mark all fields as touched to show validation messages
+    this.registerForm.markAllAsTouched();
+
     if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    if (this.passwordMismatch) {
+      this.errorMessage = 'Passwords do not match.';
+      return;
+    }
 
-    const { confirmPassword, ...userData } = this.registerForm.value;
+    this.isLoading = true;
 
-    this.authService.register(userData).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/']);
+    const { confirmPassword, ...registerData } = this.registerForm.value;
+
+    // Remove email if empty
+    if (!registerData.email) {
+      delete registerData.email;
+    }
+
+    this.authService.register(registerData).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.successMessage = response.message || 'Registration successful! Redirecting to login...';
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000);
       },
       error: (err) => {
-        this.loading = false;
+        this.isLoading = false;
         this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
       }
     });
