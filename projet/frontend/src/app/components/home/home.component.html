@@ -8,41 +8,53 @@
     <p class="welcome-text">Manage your laboratory bookings and equipment reservations from here.</p>
 
     <div class="quick-links">
+      <a routerLink="/search" class="card-link">
+        <div class="card-icon">🔍</div>
+        <h3>Equipment Catalog</h3>
+        <p>Filter, search, and discover available lab equipment</p>
+      </a>
+
+      <a routerLink="/booking" class="card-link">
+        <div class="card-icon">🛒</div>
+        <h3>Book Equipment</h3>
+        <p>Reserve cameras, 3D printers, and lab kits</p>
+      </a>
+
+      <a routerLink="/dashboard" class="card-link">
+        <div class="card-icon">📋</div>
+        <h3>My Reservations</h3>
+        <p>Track active bookings and check approval status</p>
+      </a>
+
+      <a routerLink="/calendar" class="card-link">
+        <div class="card-icon">📅</div>
+        <h3>Booking Calendar</h3>
+        <p>Interactive schedule that updates live</p>
+      </a>
+
       <a routerLink="/profile" class="card-link">
         <div class="card-icon">👤</div>
         <h3>My Profile</h3>
-        <p>View and update your personal information</p>
+        <p>View profile information and change password</p>
       </a>
 
-      <a routerLink="/" class="card-link">
-        <div class="card-icon">🔬</div>
-        <h3>Book a Lab</h3>
-        <p>Reserve a laboratory for your experiments</p>
-      </a>
-
-      <a routerLink="/" class="card-link">
-        <div class="card-icon">🛠️</div>
-        <h3>Equipment</h3>
-        <p>Browse and reserve available equipment</p>
-      </a>
-
-      <a *ngIf="currentUser.role === 'admin'" routerLink="/" class="card-link admin-card">
-        <div class="card-icon">⚙️</div>
-        <h3>Admin Panel</h3>
-        <p>Manage users, labs, and equipment</p>
+      <a *ngIf="currentUser.role === 'admin'" routerLink="/admin/reservations" class="card-link admin-card">
+        <div class="card-icon">🛡️</div>
+        <h3>Manage Bookings</h3>
+        <p>Approve, reject, or return equipment reservations</p>
       </a>
     </div>
   </div>
 
   <!-- Guest view -->
   <div *ngIf="!isLoggedIn" class="guest-section">
-    <h1>🔬 Lab Booking System</h1>
+    <h1>🔬 University Lab & Equipment Booking System</h1>
     <p class="hero-text">
-      The easiest way to book university laboratories and equipment.
-      Sign in to get started.
+      Browse, reserve, and manage expensive university equipment (cameras, 3D printers, lab kits).
     </p>
     <div class="cta-buttons">
-      <a routerLink="/login" class="btn-primary">Sign In</a>
+      <a routerLink="/search" class="btn-secondary" style="margin-right: 12px; background: #e0e0e0; color: #333; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Browse Catalog</a>
+      <a routerLink="/login" class="btn-primary" style="margin-right: 12px;">Sign In</a>
       <a routerLink="/register" class="btn-accent">Create Account</a>
     </div>
   </div>

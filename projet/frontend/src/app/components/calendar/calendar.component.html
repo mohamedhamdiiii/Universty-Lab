@@ -1,0 +1,112 @@
+<div class="calendar-container">
+  <!-- Header with Month, Navigation and Equipment Filter -->
+  <div class="calendar-header">
+    <div class="title-section">
+      <h2>📅 Booking Calendar</h2>
+      <p class="subtitle">Live schedule and equipment reservation timeline</p>
+    </div>
+
+    <div class="controls-section">
+      <!-- Equipment Filter -->
+      <div class="equipment-filter">
+        <label>Equipment:</label>
+        <select #equipSelect (change)="onEquipmentFilterChange(equipSelect.value)">
+          <option value="">All Equipment</option>
+          <option *ngFor="let eq of equipmentList" [value]="eq.id">
+            {{ eq.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-buttons">
+        <button class="btn btn-nav" (click)="prevMonth()" title="Previous Month">◀</button>
+        <button class="btn btn-today" (click)="goToToday()">Today</button>
+        <button class="btn btn-nav" (click)="nextMonth()" title="Next Month">▶</button>
+      </div>
+
+      <div class="current-month-display">
+        {{ monthNames[selectedMonth - 1] }} {{ selectedYear }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Legend -->
+  <div class="legend-bar">
+    <div class="legend-item">
+      <span class="legend-dot dot-approved"></span> Approved
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot dot-pending"></span> Pending
+    </div>
+    <div class="legend-item">
+      <span class="legend-dot dot-today"></span> Today
+    </div>
+    <div *ngIf="loading" class="calendar-loading">
+      <span class="mini-spinner"></span> Updating schedule...
+    </div>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="calendar-grid-card">
+    <!-- Day Headers -->
+    <div class="weekdays-row">
+      <div *ngFor="let day of weekDays" class="weekday-header">
+        {{ day }}
+      </div>
+    </div>
+
+    <!-- Days Cells -->
+    <div class="days-grid">
+      <div
+        *ngFor="let day of calendarDays"
+        class="day-cell"
+        [class.other-month]="!day.isCurrentMonth"
+        [class.today]="day.isToday"
+        [class.has-events]="day.events.length > 0"
+        (click)="openDayDetails(day)"
+      >
+        <div class="day-number">{{ day.dayNumber }}</div>
+
+        <div class="events-container">
+          <div
+            *ngFor="let ev of day.events | slice:0:3"
+            class="event-pill"
+            [ngClass]="getStatusClass(ev.status)"
+            [title]="ev.title + ' (' + ev.status + ')'"
+          >
+            {{ ev.title }}
+          </div>
+          <div *ngIf="day.events.length > 3" class="more-events">
+            +{{ day.events.length - 3 }} more
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Popover / Modal -->
+  <div *ngIf="selectedDayEvents" class="modal-backdrop" (click)="closeDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Reservations on {{ selectedDayEvents.day | date:'fullDate' }}</h3>
+        <button class="close-btn" (click)="closeDetails()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div *ngFor="let ev of selectedDayEvents.events" class="event-detail-item">
+          <div class="event-detail-header">
+            <h4>{{ ev.title }}</h4>
+            <span class="status-badge" [ngClass]="getStatusClass(ev.status)">
+              {{ ev.status | uppercase }}
+            </span>
+          </div>
+          <p class="event-dates"><strong>Duration:</strong> {{ ev.start }} to {{ ev.end }}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a routerLink="/booking" class="btn btn-primary" (click)="closeDetails()">Book Equipment</a>
+        <button class="btn btn-secondary" (click)="closeDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

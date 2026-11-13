@@ -1,0 +1,103 @@
+<div class="search-page-layout">
+  <!-- Dynamic Sidebar with reactive filters -->
+  <app-sidebar (filterChange)="onFilterChange($event)"></app-sidebar>
+
+  <!-- Main Content Area -->
+  <main class="search-content">
+    <div class="search-header">
+      <div>
+        <h2>🔬 Equipment Catalog & Search</h2>
+        <p class="subtitle">Search, filter, and discover university lab equipment</p>
+      </div>
+      <div class="results-count" *ngIf="!loading">
+        Found <strong>{{ pagination.total }}</strong> item(s) (Page {{ pagination.page }} of {{ pagination.totalPages || 1 }})
+      </div>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Searching lab equipment...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && equipments.length === 0" class="empty-state">
+      <div class="empty-icon">🔎</div>
+      <h3>No equipment found</h3>
+      <p>Try adjusting your search criteria, clearing filters, or searching for a different keyword.</p>
+    </div>
+
+    <!-- Equipment Cards Grid -->
+    <div *ngIf="!loading && equipments.length > 0" class="equipment-grid">
+      <div *ngFor="let item of equipments" class="equipment-card">
+        <div class="card-image-box">
+          <img
+            [src]="item.imageUrl || 'https://via.placeholder.com/350x220?text=Lab+Equipment'"
+            [alt]="item.name"
+            class="card-img"
+          />
+          <span
+            class="availability-badge"
+            [class.available]="item.available"
+            [class.unavailable]="!item.available"
+          >
+            {{ item.available ? '✓ Available' : '✕ Unavailable' }}
+          </span>
+        </div>
+
+        <div class="card-content">
+          <div class="card-header-row">
+            <span class="category-badge">{{ item.category }}</span>
+            <span class="quantity-info">Qty: <strong>{{ item.quantity }}</strong></span>
+          </div>
+
+          <h3 class="card-title">{{ item.name }}</h3>
+          <p class="card-desc">{{ item.description || 'No description provided.' }}</p>
+
+          <div class="card-footer">
+            <button
+              class="btn-book"
+              [disabled]="!item.available"
+              (click)="bookEquipment(item)"
+            >
+              {{ item.available ? 'Reserve Now' : 'Not Available' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div *ngIf="!loading && pagination.totalPages > 1" class="pagination-bar">
+      <button
+        class="page-btn nav-btn"
+        [disabled]="pagination.page <= 1"
+        (click)="goToPage(pagination.page - 1)"
+      >
+        « Prev
+      </button>
+
+      <button
+        *ngFor="let p of pagesArray"
+        class="page-btn"
+        [class.active]="p === pagination.page"
+        (click)="goToPage(p)"
+      >
+        {{ p }}
+      </button>
+
+      <button
+        class="page-btn nav-btn"
+        [disabled]="pagination.page >= pagination.totalPages"
+        (click)="goToPage(pagination.page + 1)"
+      >
+        Next »
+      </button>
+    </div>
+  </main>
+</div>

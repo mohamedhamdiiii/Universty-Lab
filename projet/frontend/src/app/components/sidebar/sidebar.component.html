@@ -1,0 +1,121 @@
+<!-- Mobile toggle button -->
+<button class="sidebar-toggle" (click)="toggleSidebar()">
+  <span class="toggle-icon">{{ isCollapsed ? '☰' : '✕' }}</span>
+  <span>Filters</span>
+</button>
+
+<aside class="sidebar" [class.open]="!isCollapsed">
+  <div class="sidebar-header">
+    <h3>🔍 Filters</h3>
+    <button class="btn-reset" (click)="resetFilters()">Reset</button>
+  </div>
+
+  <form [formGroup]="filterForm">
+    <!-- Search Input -->
+    <div class="filter-section">
+      <label class="section-label">Search</label>
+      <input
+        type="text"
+        formControlName="q"
+        placeholder="Search equipment..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Category Checkboxes -->
+    <div class="filter-section">
+      <label class="section-label">Category</label>
+      <div class="checkbox-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="categoryCamera" />
+          <span class="checkmark"></span>
+          Camera
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="category3DPrinter" />
+          <span class="checkmark"></span>
+          3D Printer
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="categoryLabKit" />
+          <span class="checkmark"></span>
+          Lab Kit
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="categoryOther" />
+          <span class="checkmark"></span>
+          Other
+        </label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Availability Dropdown -->
+    <div class="filter-section">
+      <label class="section-label">Availability</label>
+      <select formControlName="available" class="filter-select">
+        <option value="all">All</option>
+        <option value="true">Available Only</option>
+        <option value="false">Unavailable</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Minimum Quantity Dropdown -->
+    <div class="filter-section">
+      <label class="section-label">Minimum Quantity</label>
+      <select formControlName="minQuantity" class="filter-select">
+        <option [ngValue]="0">Any</option>
+        <option [ngValue]="1">1+</option>
+        <option [ngValue]="5">5+</option>
+        <option [ngValue]="10">10+</option>
+      </select>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Sort By Dropdown -->
+    <div class="filter-section">
+      <label class="section-label">Sort By</label>
+      <select formControlName="sortBy" class="filter-select">
+        <option value="name">Name</option>
+        <option value="category">Category</option>
+        <option value="quantity">Quantity</option>
+        <option value="createdAt">Date Added</option>
+      </select>
+    </div>
+
+    <!-- Sort Order Toggle -->
+    <div class="filter-section">
+      <label class="section-label">Sort Order</label>
+      <button type="button" class="sort-toggle" (click)="toggleSortOrder()">
+        <span *ngIf="filterForm.get('sortOrder')?.value === 'ASC'">↑ Ascending</span>
+        <span *ngIf="filterForm.get('sortOrder')?.value === 'DESC'">↓ Descending</span>
+      </button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Items Per Page Dropdown -->
+    <div class="filter-section">
+      <label class="section-label">Items Per Page</label>
+      <select formControlName="limit" class="filter-select">
+        <option [ngValue]="5">5</option>
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+      </select>
+    </div>
+  </form>
+</aside>
+
+<!-- Overlay for mobile -->
+<div
+  class="sidebar-overlay"
+  *ngIf="!isCollapsed"
+  (click)="toggleSidebar()"
+></div>

@@ -1,17 +1,24 @@
 <nav class="navbar">
   <div class="nav-container">
-    <a class="nav-brand" routerLink="/">🔬 Lab Booking System</a>
+    <a class="nav-brand" routerLink="/">🔬 Lab Booking</a>
 
     <button class="hamburger" (click)="toggleMenu()" [class.active]="menuOpen">
       <span></span><span></span><span></span>
     </button>
 
     <div class="nav-links" [class.open]="menuOpen">
+      <!-- Universal link -->
+      <a routerLink="/search" routerLinkActive="active" (click)="menuOpen=false">Catalog</a>
+
       <!-- Logged-in links -->
       <ng-container *ngIf="isLoggedIn">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" (click)="menuOpen=false">Home</a>
+        <a routerLink="/booking" routerLinkActive="active" (click)="menuOpen=false">Book</a>
+        <a routerLink="/dashboard" routerLinkActive="active" (click)="menuOpen=false">My Reservations</a>
+        <a routerLink="/calendar" routerLinkActive="active" (click)="menuOpen=false">Calendar</a>
         <a routerLink="/profile" routerLinkActive="active" (click)="menuOpen=false">Profile</a>
-        <a *ngIf="isAdmin" routerLink="/admin/users" routerLinkActive="active" (click)="menuOpen=false">Manage Users</a>
+        <a *ngIf="isAdmin" routerLink="/admin/reservations" routerLinkActive="active" class="badge-admin-link" (click)="menuOpen=false">
+          Manage Bookings
+        </a>
         <button class="btn-logout" (click)="logout()">Logout</button>
       </ng-container>
 
