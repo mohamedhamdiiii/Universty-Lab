@@ -26,6 +26,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 // --- Routes ---
 app.use('/user', require('./routers/user.router'))
 app.use('/equipment', require('./routers/equipment.router'))
+app.use('/reservations', require('./routes/reservationRoutes'))
+app.use('/search', require('./routes/searchRoutes'))
+app.use('/api/reservations', require('./routes/reservationRoutes'))
+app.use('/api/search', require('./routes/searchRoutes'))
 
 // --- Database connection and table sync ---
 async function startup() {

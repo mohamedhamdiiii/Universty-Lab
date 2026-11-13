@@ -1,39 +1,22 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-<<<<<<< HEAD
-import { Equipment } from '../models/reservation.model';
-import { environment } from '../../environments/environment';
-=======
 import { environment } from '../../environments/environment';
 import { Equipment } from '../models/equipment.model';
->>>>>>> origin/ayoub
 
 @Injectable({
   providedIn: 'root'
 })
 export class EquipmentService {
-<<<<<<< HEAD
-  private apiUrl = `${environment.apiUrl}/equipments`;
-
-  constructor(private http: HttpClient) {}
-
-=======
   private apiUrl = `${environment.apiUrl}/equipment`;
 
   constructor(private http: HttpClient) {}
 
   // Get all equipment
->>>>>>> origin/ayoub
   getAllEquipment(): Observable<Equipment[]> {
     return this.http.get<Equipment[]>(this.apiUrl);
   }
 
-<<<<<<< HEAD
-  getEquipmentById(id: number): Observable<Equipment> {
-    return this.http.get<Equipment>(`${this.apiUrl}/${id}`);
-  }
-=======
   // Get one equipment by ID
   getEquipmentById(id: number): Observable<Equipment> {
     return this.http.get<Equipment>(`${this.apiUrl}/${id}`);
@@ -56,7 +39,8 @@ export class EquipmentService {
 
   // Helper: get the full image URL from the backend
   getImageUrl(imagePath: string): string {
-    return `${environment.apiUrl}${imagePath}`;
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+    return `${environment.apiUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
   }
->>>>>>> origin/ayoub
 }

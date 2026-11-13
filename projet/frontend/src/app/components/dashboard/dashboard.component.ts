@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-<<<<<<< HEAD
+import { AuthService } from '../../services/auth.service';
 import { ReservationService } from '../../services/reservation.service';
 import { Reservation } from '../../models/reservation.model';
 import { User } from '../../models/user.model';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -18,41 +17,40 @@ export class DashboardComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   activeFilter: 'all' | 'active' | 'pending' | 'approved' | 'past' = 'all';
-    currentUser: User | null = null;
+
+  currentUser: User | null = null;
   users: User[] = [];
   isLoadingUsers = false;
   usersError = '';
 
-  constructor(private reservationService: ReservationService,  private authService: AuthService,
-    private router: Router) {}
+  constructor(
+    private reservationService: ReservationService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadReservations();
-      this.currentUser = this.authService.getCurrentUser();
-    this.loadUsers();
+    if (this.currentUser?.role === 'admin') {
+      this.loadUsers();
+    }
   }
 
   loadReservations(): void {
     this.loading = true;
     this.reservationService.getMyReservations().subscribe({
       next: (data) => {
-        this.reservations = data;
+        this.reservations = data || [];
         this.applyFilter(this.activeFilter);
         this.loading = false;
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Failed to load reservations';
         this.loading = false;
-
       }
     });
   }
-
-
-
-
-
- 
 
   loadUsers(): void {
     this.isLoadingUsers = true;
@@ -60,13 +58,15 @@ export class DashboardComponent implements OnInit {
 
     this.authService.getAllUsers().subscribe({
       next: (users) => {
-        this.users = users;
+        this.users = users || [];
         this.isLoadingUsers = false;
       },
       error: (err) => {
         this.usersError = err.error?.message || 'Failed to load users.';
         this.isLoadingUsers = false;
-      }}) }
+      }
+    });
+  }
 
   applyFilter(filter: 'all' | 'active' | 'pending' | 'approved' | 'past'): void {
     this.activeFilter = filter;
@@ -116,7 +116,9 @@ export class DashboardComponent implements OnInit {
       case 'returned': return 'badge-returned';
       case 'cancelled': return 'badge-cancelled';
       default: return '';
-    }}
+    }
+  }
+
   logout(): void {
     this.authService.logout();
   }
@@ -131,7 +133,12 @@ export class DashboardComponent implements OnInit {
           alert(err.error?.message || 'Failed to delete user.');
         }
       });
-
     }
+  }
+
+  getImageUrl(url?: string | null): string {
+    if (!url) return 'https://via.placeholder.com/300x200?text=Equipment';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `http://localhost:3000${url.startsWith('/') ? '' : '/'}${url}`;
   }
 }
