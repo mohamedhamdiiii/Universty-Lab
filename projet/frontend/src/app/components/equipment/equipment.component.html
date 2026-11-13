@@ -1,0 +1,188 @@
+<div class="equipment-container">
+
+  <!-- Top Navigation & Header -->
+  <div class="top-nav">
+    <a routerLink="/dashboard" class="nav-back">← Back to Dashboard</a>
+    <h2>Equipment Management</h2>
+    <span class="system-tag">Student 2 Module</span>
+  </div>
+  <p class="page-subtitle">Add, view, edit and manage lab equipment</p>
+
+  <!-- ==================== ADD EQUIPMENT FORM ==================== -->
+  <div class="form-section">
+    <h3>{{ isEditing ? 'Edit Equipment' : 'Add New Equipment' }}</h3>
+
+    <!-- Success Message -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      ❌ {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="equipmentForm" (ngSubmit)="onSubmit()">
+
+      <!-- Name -->
+      <div class="form-group">
+        <label for="name">Equipment Name <span class="required">*</span></label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          placeholder="Enter equipment name"
+          [class.input-error]="f['name'].touched && f['name'].invalid"
+        />
+        <div class="validation-error" *ngIf="f['name'].touched && f['name'].errors">
+          <span *ngIf="f['name'].errors?.['required']">Name is required.</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          placeholder="Enter description"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Category -->
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input
+          type="text"
+          id="category"
+          formControlName="category"
+          placeholder="e.g. Electronics, Chemistry, Physics"
+        />
+      </div>
+
+      <!-- Quantity and Status in a row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="quantity">Quantity <span class="required">*</span></label>
+          <input
+            type="number"
+            id="quantity"
+            formControlName="quantity"
+            min="0"
+            [class.input-error]="f['quantity'].touched && f['quantity'].invalid"
+          />
+          <div class="validation-error" *ngIf="f['quantity'].touched && f['quantity'].errors">
+            <span *ngIf="f['quantity'].errors?.['required']">Quantity is required.</span>
+            <span *ngIf="f['quantity'].errors?.['min']">Quantity cannot be negative.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status <span class="required">*</span></label>
+          <select id="status" formControlName="status">
+            <option value="available">Available</option>
+            <option value="in_use">In Use</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="form-group">
+        <label for="image">Equipment Image</label>
+        <input
+          type="file"
+          id="image"
+          accept="image/jpeg,image/jpg,image/png"
+          (change)="onFileSelected($event)"
+        />
+        <small class="help-text">Accepted formats: JPG, JPEG, PNG (max 5MB)</small>
+
+        <!-- Image Preview -->
+        <div class="image-preview" *ngIf="imagePreview">
+          <img [src]="imagePreview" alt="Preview" />
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="form-buttons">
+        <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Equipment' : 'Add Equipment' }}</span>
+          <span *ngIf="isSubmitting">Saving...</span>
+        </button>
+        <button type="button" class="btn-secondary" *ngIf="isEditing" (click)="cancelEdit()">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ==================== EQUIPMENT GRID ==================== -->
+  <div class="grid-section">
+    <div class="section-header">
+      <h3>All Equipment</h3>
+      <button class="btn-refresh" (click)="loadEquipments()" [disabled]="isLoading">
+        🔄 Refresh
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <p>Loading equipment...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="alert alert-error" *ngIf="loadError && !isLoading">
+      ❌ {{ loadError }}
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && !loadError && equipments.length === 0">
+      <p>No equipment found. Add your first equipment above!</p>
+    </div>
+
+    <!-- Equipment Cards Grid -->
+    <div class="equipment-grid" *ngIf="!isLoading && equipments.length > 0">
+      <div class="equipment-card" *ngFor="let item of equipments">
+
+        <!-- Card Image -->
+        <div class="card-image">
+          <img
+            *ngIf="item.image"
+            [src]="getImageUrl(item.image)"
+            [alt]="item.name"
+          />
+          <div class="no-image" *ngIf="!item.image">
+            📷 No Image
+          </div>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <h4 class="card-title">{{ item.name }}</h4>
+          <p class="card-description" *ngIf="item.description">{{ item.description }}</p>
+
+          <div class="card-details">
+            <span class="card-category" *ngIf="item.category">📁 {{ item.category }}</span>
+            <span class="card-quantity">📦 Qty: {{ item.quantity }}</span>
+            <span class="card-status" [ngClass]="{
+              'status-available': item.status === 'available',
+              'status-in-use': item.status === 'in_use',
+              'status-maintenance': item.status === 'maintenance'
+            }">
+              {{ item.status === 'in_use' ? 'In Use' : (item.status === 'maintenance' ? 'Maintenance' : 'Available') }}
+            </span>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="card-actions">
+            <button class="btn-edit" (click)="editEquipment(item)">✏️ Edit</button>
+            <button class="btn-delete" (click)="deleteEquipment(item.id)">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
