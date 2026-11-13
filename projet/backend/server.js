@@ -1,13 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
 
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
+const { connectDB } = require('./config/db');
 
 const app = express();
 
@@ -23,8 +21,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Lab Booking API is running' });
 });
 
-// Start server
+// Connect to MySQL and start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });

@@ -5,7 +5,7 @@ const User = require('../models/User');
 // Helper: generate JWT token
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user.id, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );
@@ -42,7 +42,7 @@ const register = async (req, res) => {
     const { firstName, lastName, email, password, phone, department } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
@@ -61,12 +61,9 @@ const register = async (req, res) => {
     const token = generateToken(user);
 
     // Return user data without password
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
     res.status(201).json({
       token,
-      user: userResponse
+      user: user.toSafeObject()
     });
   } catch (error) {
     console.error('Register error:', error.message);
@@ -87,7 +84,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -102,12 +99,9 @@ const login = async (req, res) => {
     const token = generateToken(user);
 
     // Return user data without password
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
     res.status(200).json({
       token,
-      user: userResponse
+      user: user.toSafeObject()
     });
   } catch (error) {
     console.error('Login error:', error.message);
@@ -120,7 +114,9 @@ const login = async (req, res) => {
 // @access  Protected
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] }
+    });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -145,15 +141,17 @@ const updateProfile = async (req, res) => {
     if (phone !== undefined) updateFields.phone = phone;
     if (department !== undefined) updateFields.department = department;
 
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    ).select('-password');
+    const [affectedRows] = await User.update(updateFields, {
+      where: { id: req.user.id }
+    });
 
-    if (!user) {
+    if (affectedRows === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    const user = await User.findByPk(req.user.id, {
+      attributes: { exclude: ['password'] }
+    });
 
     res.status(200).json(user);
   } catch (error) {
@@ -167,7 +165,9 @@ const updateProfile = async (req, res) => {
 // @access  Admin only
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.findAll({
+      attributes: { exclude: ['password'] }
+    });
     res.status(200).json(users);
   } catch (error) {
     console.error('GetAllUsers error:', error.message);
@@ -180,7 +180,9 @@ const getAllUsers = async (req, res) => {
 // @access  Admin only
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findByPk(req.params.id, {
+      attributes: { exclude: ['password'] }
+    });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -188,9 +190,6 @@ const getUserById = async (req, res) => {
     res.status(200).json(user);
   } catch (error) {
     console.error('GetUserById error:', error.message);
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
-    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -200,17 +199,16 @@ const getUserById = async (req, res) => {
 // @access  Admin only
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {
+    const deleted = await User.destroy({
+      where: { id: req.params.id }
+    });
+    if (!deleted) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (error) {
     console.error('DeleteUser error:', error.message);
-    if (error.kind === 'ObjectId') {
-      return res.status(404).json({ message: 'User not found' });
-    }
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -228,7 +226,7 @@ const changePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     // Find user with password field
-    const user = await User.findById(req.user.id);
+    const user = await User.findByPk(req.user.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -239,7 +237,7 @@ const changePassword = async (req, res) => {
       return res.status(401).json({ message: 'Current password is incorrect' });
     }
 
-    // Update password (pre-save hook will hash it)
+    // Update password (beforeUpdate hook will hash it)
     user.password = newPassword;
     await user.save();
 

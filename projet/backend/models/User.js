@@ -1,66 +1,90 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   firstName: {
-    type: String,
-    required: [true, 'First name is required'],
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: { msg: 'First name is required' }
+    }
   },
   lastName: {
-    type: String,
-    required: [true, 'Last name is required'],
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: { msg: 'Last name is required' }
+    }
   },
   email: {
-    type: String,
-    required: [true, 'Email is required'],
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email']
+    validate: {
+      isEmail: { msg: 'Please provide a valid email' }
+    },
+    set(value) {
+      this.setDataValue('email', value.toLowerCase().trim());
+    }
   },
   password: {
-    type: String,
-    required: [true, 'Password is required'],
-    minlength: [6, 'Password must be at least 6 characters']
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: { args: [6], msg: 'Password must be at least 6 characters' }
+    }
   },
   role: {
-    type: String,
-    enum: ['student', 'admin'],
-    default: 'student'
+    type: DataTypes.ENUM('student', 'admin'),
+    defaultValue: 'student'
   },
   phone: {
-    type: String,
-    trim: true
+    type: DataTypes.STRING,
+    allowNull: true
   },
   department: {
-    type: String,
-    trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
+    type: DataTypes.STRING,
+    allowNull: true
   }
-});
-
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
+}, {
+  tableName: 'users',
+  timestamps: true,
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  hooks: {
+    // Hash password before creating a user
+    beforeCreate: async (user) => {
+      if (user.password) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+    // Hash password before updating if it changed
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    }
   }
 });
 
 // Instance method to compare passwords
-userSchema.methods.comparePassword = async function (candidatePassword) {
+User.prototype.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+// Helper to return user data without password
+User.prototype.toSafeObject = function () {
+  const values = { ...this.get() };
+  delete values.password;
+  return values;
+};
+
+module.exports = User;
